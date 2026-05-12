@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farris Hub - Advanced Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .search-section {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 5px;
+            font-size: 0.95em;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        input[type="text"]::placeholder,
+        select {
+            color: rgba(0, 255, 255, 0.5);
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            border-color: #ff00ff;
+        }
+
+        button {
+            padding: 10px 25px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: 2px solid #00ffff;
+            color: #000;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            border-color: #ff00ff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .web-search-section {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .web-search-section h2 {
+            color: #ff00ff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .results-section {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .results-section h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .game-card {
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            background: rgba(0, 50, 100, 0.95);
+        }
+
+        .game-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .game-name {
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .game-year {
+            font-size: 0.8em;
+            color: rgba(0, 255, 255, 0.6);
+        }
+
+        .game-genre {
+            font-size: 0.8em;
+            color: #ff00ff;
+            margin-top: 5px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #ff00ff;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 15px;
+            color: rgba(0, 255, 255, 0.6);
+            font-size: 0.9em;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-button button {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starField"></canvas>
+    
+    <div class="container">
+        <div class="back-button">
+            <button onclick="goHome()">← Back to Games</button>
+        </div>
+
+        <header>
+            <h1>🔍 FARRIS HUB - ADVANCED SEARCH</h1>
+            <p style="color: #ff00ff; margin-top: 10px;">Find Your Perfect Arcade Game</p>
+        </header>
+
+        <div class="search-section">
+            <h2 style="color: #00ffff; margin-bottom: 15px;">🎮 Search Arcade Games</h2>
+            <div class="search-row">
+                <div class="search-group">
+                    <label for="gameName">Game Name</label>
+                    <input type="text" id="gameName" placeholder="Search by game name...">
+                </div>
+                <div class="search-group">
+                    <label for="genre">Genre</label>
+                    <select id="genre">
+                        <option value="">All Genres</option>
+                        <option value="Shooter">Shooter</option>
+                        <option value="Platformer">Platformer</option>
+                        <option value="Fighting">Fighting</option>
+                        <option value="Racing">Racing</option>
+                        <option value="Maze">Maze</option>
+                        <option value="Puzzle">Puzzle</option>
+                        <option value="Action">Action</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Arcade">Arcade</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Rhythm">Rhythm</option>
+                        <option value="Beat em up">Beat em up</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Collection">Collection</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label for="decade">Decade</label>
+                    <select id="decade">
+                        <option value="">All Decades</option>
+                        <option value="1970">1970s</option>
+                        <option value="1980">1980s</option>
+                        <option value="1990">1990s</option>
+                        <option value="2000">2000s</option>
+                        <option value="2010">2010s+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="searchArcadeGames()">🔎 Search Games</button>
+                <button onclick="clearFilters()">🔄 Clear Filters</button>
+            </div>
+        </div>
+
+        <div class="web-search-section">
+            <h2>🌐 Web Search (DuckDuckGo)</h2>
+            <div class="search-row">
+                <div class="search-group" style="flex: 1;">
+                    <label for="webSearch">Search the Web</label>
+                    <input type="text" id="webSearch" placeholder="Enter your search query...">
+                </div>
+                <div style="display: flex; align-items: flex-end; flex: 0.3; gap: 10px;">
+                    <button onclick="searchWeb()" style="width: 100%;">🔍 Search Web</button>
+                </div>
+            </div>
+            <div class="info">💡 Searches the web using DuckDuckGo in a new tab (no redirects!)</div>
+        </div>
+
+        <div class="results-section">
+            <h2>📊 Results</h2>
+            <div class="info" id="resultCount"></div>
+            <div class="games-grid" id="resultsGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('starField');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let stars = [];
+        const starCount = 300;
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.z = Math.random() * canvas.width;
+                this.size = Math.random() * 1.5;
+            }
+
+            update() {
+                this.z -= 5;
+                if (this.z <= 0) {
+                    this.z = canvas.width;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            }
+
+            draw() {
+                const perspective = canvas.width / (2 * this.z);
+                const x = (this.x - canvas.width / 2) * perspective + canvas.width / 2;
+                const y = (this.y - canvas.height / 2) * perspective + canvas.height / 2;
+                const size = this.size * perspective;
+
+                ctx.fillStyle = `rgba(0, 255, 255, ${1 - this.z / canvas.width})`;
+                ctx.fillRect(x, y, size, size);
+            }
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < starCount; i++) {
+                stars.push(new Star());
+            }
+        }
+
+        function animateStars() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        initStars();
+        animateStars();
+
+        const arcadeGames = [
+            { name: 'Pong', year: 1972, genre: 'Sports', emoji: '🎾' },
+            { name: 'Space Invaders', year: 1978, genre: 'Shooter', emoji: '👾' },
+            { name: 'Asteroids', year: 1979, genre: 'Shooter', emoji: '💫' },
+            { name: 'Pac-Man', year: 1980, genre: 'Maze', emoji: '👻' },
+            { name: 'Donkey Kong', year: 1981, genre: 'Platformer', emoji: '🦍' },
+            { name: 'Galaga', year: 1981, genre: 'Shooter', emoji: '🎯' },
+            { name: 'Super Mario Bros', year: 1985, genre: 'Platformer', emoji: '🍄' },
+            { name: 'Street Fighter II', year: 1991, genre: 'Fighting', emoji: '👊' },
+            { name: 'Mortal Kombat', year: 1992, genre: 'Fighting', emoji: '🥋' },
+            { name: 'Metal Slug', year: 1996, genre: 'Shooter', emoji: '🎖️' },
+            { name: 'Dance Dance Revolution', year: 2001, genre: 'Rhythm', emoji: '💃' },
+        ];
+
+        for (let i = 0; i < 900; i++) {
+            const genres = ['Shooter', 'Platformer', 'Racing', 'Fighting', 'Puzzle', 'Arcade', 'Action'];
+            const emojis = ['🎮', '🎯', '🎪', '🎨', '🎭', '🎲', '🎳', '🛸', '🚀', '⚡'];
+            const years = [1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020];
+
+            arcadeGames.push({
+                name: `Arcade Game ${i + 1}`,
+                year: years[Math.floor(Math.random() * years.length)],
+                genre: genres[Math.floor(Math.random() * genres.length)],
+                emoji: emojis[Math.floor(Math.random() * emojis.length)]
+            });
+        }
+
+        function displayResults(games) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            resultsGrid.innerHTML = '';
+
+            if (games.length === 0) {
+                resultsGrid.innerHTML = '<div class="no-results" style="grid-column: 1 / -1;">No games found matching your filters!</div>';
+                document.getElementById('resultCount').textContent = 'No results';
+                return;
+            }
+
+            games.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="game-emoji">${game.emoji}</div>
+                    <div class="game-name">${game.name}</div>
+                    <div class="game-year">📅 ${game.year}</div>
+                    <div class="game-genre">${game.genre}</div>
+                `;
+                resultsGrid.appendChild(card);
+            });
+
+            document.getElementById('resultCount').textContent = `Found ${games.length} game(s)`;
+        }
+
+        function searchArcadeGames() {
+            const gameName = document.getElementById('gameName').value.toLowerCase();
+            const genre = document.getElementById('genre').value;
+            const decade = document.getElementById('decade').value;
+
+            let filtered = arcadeGames;
+
+            if (gameName) {
+                filtered = filtered.filter(game => game.name.toLowerCase().includes(gameName));
+            }
+
+            if (genre) {
+                filtered = filtered.filter(game => game.genre === genre);
+            }
+
+            if (decade) {
+                const decadeNum = parseInt(decade);
+                filtered = filtered.filter(game => {
+                    const gameDecade = Math.floor(game.year / 10) * 10;
+                    return gameDecade >= decadeNum && gameDecade < decadeNum + 10;
+                });
+            }
+
+            displayResults(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('gameName').value = '';
+            document.getElementById('genre').value = '';
+            document.getElementById('decade').value = '';
+            displayResults([]);
+            document.getElementById('resultCount').textContent = 'Enter search criteria above';
+        }
+
+        function searchWeb() {
+            const query = document.getElementById('webSearch').value.trim();
+            if (!query) {
+                alert('Please enter a search query!');
+                return;
+            }
+
+            const duckDuckGoURL = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&ia=web`;
+            window.open(duckDuckGoURL, '_blank');
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('gameName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchArcadeGames();
+        });
+
+        document.getElementById('webSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchWeb();
+        });
+    </script>
+</body>
+</html>
